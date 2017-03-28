@@ -20,6 +20,13 @@ void Init_NVIC(void);
 void Init_TI_KEY(void);
 void Delay_Ms(uint16_t time);  
 void Delay_Us(uint16_t time); 
+int getshumaguannNum(int val);
+
+int gLED1 = 0xff;
+int gLED2 = 0xff;
+
+int gLED1_irq = 0;
+int gLED2_irq = 0;
 /*:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ** 函数名称: main
 ** 功能描述: 主函数入口
@@ -31,6 +38,8 @@ void Delay_Us(uint16_t time);
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::*/
 int main(void)
 {
+	
+	int num1 = 0, num2= 0;
 	SystemInit();					//系统时钟配置
 	Init_NVIC();					//中断向量表注册函数
 	Init_LED();						//各个外设引脚配置
@@ -42,10 +51,95 @@ int main(void)
 	printf("请输入键盘上的任意字符，串口将以十进制输出你输入的字符\n\r");		   
 	while(1)													
 	{ 
-			;
+			if(gLED1_irq == 1)
+			{
+				gLED1_irq = 0;
+				gLED1 = getnum();
+			}
+			
+			if(gLED2_irq == 1){
+				gLED2_irq = 0;
+				gLED2 = getnum();
+			}
+			
+			if(gLED1 != 0xff ){
+				if(num1 > 20){
+					//printf("[1]led1 = 0x%x \r\n",gLED1);
+					printf("\r\n[1]LED1 = %d \r\n",getshumaguannNum(gLED1));
+					num1 = 0;
+				}
+				num1 ++;
+				gLED1 = 0xff;
+				//gLED2 = 0xff;
+			}
+			if(gLED2 != 0xff){
+				
+				if(num2 > 20){
+					//printf("[2]led2 = 0x%x \r\n" , gLED2);
+					printf("\r\n[2]led2 = %d \r\n", getshumaguannNum(gLED2));
+					num2 = 0;
+				}
+				num2 ++;
+				//gLED1 = 0xff;
+				gLED2 = 0xff;
+			}
+			
+		
 //		LED1=~LED1;	   				
 //		Delay_Ms(200);				 //LED1闪烁，系统正在运行
 	}
+}
+
+int getshumaguannNum(int val){
+	char num = 0xff;
+	
+	switch(val){
+		
+		case 0x40:
+		num = 0;
+		break;
+		
+		case 0x79:
+		num = 1;
+		break;
+		
+		case 0x24:
+		num = 2;
+		break;
+		
+		case 0x30:
+		num = 3;
+		break;
+		
+		case 0x19:
+		num = 4;
+		break;
+		
+		case 0x12:
+		num = 5;
+		break;
+		
+		case 0x02:
+		num = 6;
+		break;
+		
+		case 0x78:
+		num = 7;
+		break;
+		
+		case 0x0:
+		num = 8;
+		break;
+		
+		case 0x10:
+		num = 9;
+		break;
+	
+		default:
+			break;
+	}
+//	printf(" num = %d val = 0x%x \r\n", num, val);
+	return num;
 }
 /*:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ** 函数名称: Init_LED
@@ -65,10 +159,6 @@ void Init_LED(void)
   	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;	   	//配置端口速度为50M
   	GPIO_Init(GPIOG, &GPIO_InitStructure);				   	//根据参数初始化GPIOD寄存器
 	
-		GPIO_InitStructure.GPIO_Pin = GPIO_Pin_14;			 //板上LED编号 D2
-  	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-  	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-  	GPIO_Init(GPIOG, &GPIO_InitStructure);
 
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_13;			 //板上LED编号 D5
   	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
@@ -79,38 +169,38 @@ void Init_LED(void)
 	
 	// D0 --D5  
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0;			 // D0
-  	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPD;
-  	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+  	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+  	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
   	GPIO_Init(GPIOD, &GPIO_InitStructure);
 	
 		GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1;			 //D1
-  	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPD;
-  	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+  	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+  	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
   	GPIO_Init(GPIOD, &GPIO_InitStructure);
 		
 		GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2;			 //D2
-  	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPD;
-  	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+  	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+  	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
   	GPIO_Init(GPIOD, &GPIO_InitStructure);
 		
 		GPIO_InitStructure.GPIO_Pin = GPIO_Pin_3;			 //D3
-  	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPD;
-  	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+  	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+  	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
   	GPIO_Init(GPIOD, &GPIO_InitStructure);
 		
 		GPIO_InitStructure.GPIO_Pin = GPIO_Pin_4;			 //D4
-  	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPD;
-  	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+  	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+  	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
   	GPIO_Init(GPIOD, &GPIO_InitStructure);
 		
 		GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5;			 //D5
-  	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPD;
-  	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+  	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+  	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
   	GPIO_Init(GPIOD, &GPIO_InitStructure);
 		
 		GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6;			 //D6
-  	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPD;
-  	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+  	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+  	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
   	GPIO_Init(GPIOD, &GPIO_InitStructure);
 		
 }
@@ -163,7 +253,7 @@ void Init_NVIC(void)
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);	//设置中断组 为2 
 
 	NVIC_InitStructure.NVIC_IRQChannel = USART1_IRQn;			//配置串口1为中断源
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 2; 	//设置占先优先级为2
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 3; 	//设置占先优先级为2
 	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;		  	//设置副优先级为0
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;			  	//使能串口1中断
 	NVIC_Init(&NVIC_InitStructure);							  	//根据参数初始化中断寄存器
@@ -173,98 +263,131 @@ void Init_NVIC(void)
 	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;			//副优先级为0
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;				//使能中断
 	NVIC_Init(&NVIC_InitStructure);							   	//根据参数初始化中断寄存器
+	
+	NVIC_InitStructure.NVIC_IRQChannel = EXTI0_IRQn;			//??????PE0
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;	//???????1
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;			//?????0
+	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;				//????
+	NVIC_Init(&NVIC_InitStructure);	
+	
+	
 }
 int getnum(void){
-	char d1 = 0, d2 = 0, d3 =0,  d5 = 0, d6 = 0, d7 = 0;
+//	char d1 = 0, d2 = 0, d3 =0,  d5 = 0, d6 = 0, d7 = 0;
 	int data = 0;
-	char d4 = 0;
+//	char d4 = 0;
 	
-	Delay_Ms(2);
+//	Delay_Ms(1);
 	if(PDIN0 == 1){
 		data += 0x01;
-		d1 = PDIN0;
+//		d1 = PDIN0;
 	}
 //	printf("data1=0x%x\r\n",data);
 	if(PDIN1 == 1){
 		data += 0x02;
-		d2 = PDIN1;
+//		d2 = PDIN1;
 	}
 //	printf("data2=0x%x\r\n",data);
 	if(PDIN2 == 1){
 		data |= 0x04;
-		d3 = PDIN2;
+//		d3 = PDIN2;
 	}
 //	printf("data3=0x%x\r\n",data);
 	if(PDIN3 == 1){
 		data += 0x8;
-		d4 = PDIN3;
+//		d4 = PDIN3;
 	}
 //	printf("data4=0x%x\r\n",data);
-	if(PDIN4== 1){
+	if(PDIN4 == 1){
 		data += 0x10;
-		d5 = PDIN4;
+//		d5 = PDIN4;
 	}
 //	printf("data5=0x%x\r\n",data);
-	if(PDIN5== 1){
+	if(PDIN5 == 1){
 		data += 0x20;
-		d6 = PDIN5;
+//		d6 = PDIN5;
 	}
 //	printf("data6=0x%x\r\n",data);
-	if(PDIN6== 1){
+	if(PDIN6 == 1){
 		data += 0x40;
-		d7 = PDIN6;
+//		d7 = PDIN6;
 	}
-	if(data != 0x7f)
-		printf("data7=0x%x\r\n",data);
-
+//	if(data != 0x7f)
+//		printf("data7=0x%x\r\n",data);
+	if(data == 0x7f){
+		data = 0xff;
+	}
 	return data ;
 }
 
 int getnum2(void){
-	char d1 = 0, d2 = 0, d3 =0,  d5 = 0, d6 = 0, d7 = 0;
+//	char d1 = 0, d2 = 0, d3 =0,  d5 = 0, d6 = 0, d7 = 0;
 	int data = 0;
-	char d4 = 0;
+//	char d4 = 0;
 	
 	Delay_Ms(10);
 	if(PDIN0 == 1){
 		data += 0x01;
-		d1 = PDIN0;
+//		d1 = PDIN0;
 	}
 //	printf("data1=0x%x\r\n",data);
 	if(PDIN1 == 1){
 		data += 0x02;
-		d2 = PDIN1;
+//		d2 = PDIN1;
 	}
 //	printf("data2=0x%x\r\n",data);
 	if(PDIN2 == 1){
 		data |= 0x04;
-		d3 = PDIN2;
+//		d3 = PDIN2;
 	}
 //	printf("data3=0x%x\r\n",data);
 	if(PDIN3 == 1){
 		data += 0x8;
-		d4 = PDIN3;
+//		d4 = PDIN3;
 	}
 //	printf("data4=0x%x\r\n",data);
 	if(PDIN4== 1){
 		data += 0x10;
-		d5 = PDIN4;
+//		d5 = PDIN4;
 	}
 //	printf("data5=0x%x\r\n",data);
 	if(PDIN5== 1){
 		data += 0x20;
-		d6 = PDIN5;
+//		d6 = PDIN5;
 	}
 //	printf("data6=0x%x\r\n",data);
 	if(PDIN6== 1){
 		data += 0x40;
-		d7 = PDIN6;
+//		d7 = PDIN6;
 	}
-	if(data != 0x7f)
-		printf("data7=0x%x\r\n",data);
+	if(data == 0x7f){
+//		printf("data7=0x%x\r\n",data);
+		data = 0xff;
+	}
 
 	return data ;
 }
+
+/*:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+** ????: EXTI0_IRQHandler
+** ????: ??0????			
+** ????:?
+** ?   ?: Dream
+** ?   ?: 2011?6?20?
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::*/
+void EXTI0_IRQHandler(void)
+{
+	if(EXTI_GetITStatus(EXTI_Line0)!= RESET)	 //????????,????????1
+	{
+	//	gLED2 = getnum();
+		gLED2_irq = 1;
+		
+	  LED1=1;
+	  LED2=0;							 
+	}
+	EXTI_ClearITPendingBit(EXTI_Line0);		     //???????,??!!			
+}
+
 /*:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ** 函数名称: EXTI15_10_IRQHandler
 ** 功能描述: 中断15_10入口函数			
@@ -283,9 +406,10 @@ void EXTI15_10_IRQHandler(void)
 	}
 	if(EXTI_GetITStatus(EXTI_Line12)!= RESET)  	//判断是否发生中断，发生则中断标志置1
 	{
-#if 0
-			data = getnum();
-		if(gnum %2 == 0){
+#if 1
+//		gLED2 = getnum();
+
+/*		if(gnum %2 == 0){
 			LED1=1;
 			LED2=0;
 		}
@@ -293,13 +417,14 @@ void EXTI15_10_IRQHandler(void)
 			LED1=0;
 			LED2=1;
 		}
-		gnum ++;
+		gnum ++; */
 #endif		
 	}
 	if(EXTI_GetITStatus(EXTI_Line11)!= RESET)  	//判断是否发生中断，发生则中断标志置1
 	{
-		data = getnum2();
-		if(gnum %2 == 0){
+	//	gLED1 = getnum2();
+		gLED1_irq = 1;
+/*		if(gnum %2 == 0){
 			LED1=1;
 			LED2=1;
 		}
@@ -308,6 +433,7 @@ void EXTI15_10_IRQHandler(void)
 			LED2=0;
 		}
 		gnum ++;
+		*/
 	}
 	
 	EXTI_ClearITPendingBit(EXTI_Line13);		//清楚中断挂起位，重要！！		

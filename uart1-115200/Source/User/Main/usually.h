@@ -7,7 +7,7 @@
 
 
 //LED引脚定义
-#define LED1 PGout(14)	   	//板子上对应于LD1
+//#define LED1 PGout(14)	   	//板子上对应于LD1
 
 //LED引脚定义
 #define LED1 PDout(13)	   	//板上LED编号 D5
