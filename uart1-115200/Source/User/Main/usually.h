@@ -25,4 +25,6 @@
 #define PDIN5 PDin(5)	   	//∞Â…œLED±‡∫≈ D5
 #define PDIN6 PDin(6)	   	//∞Â…œLED±‡∫≈ D6
 
+#define BAIJING_FLAG PCin(13)	   	//∞Â…œLED±‡∫≈ C13
+
 #endif

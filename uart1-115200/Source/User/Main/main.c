@@ -21,9 +21,12 @@ void Init_TI_KEY(void);
 void Delay_Ms(uint16_t time);  
 void Delay_Us(uint16_t time); 
 int getshumaguannNum(int val);
-
+int getnum(void);
 int gLED1 = 0xff;
 int gLED2 = 0xff;
+
+int gReal_Num1 = 0xff;
+int gReal_Num2 = 0xff;
 
 int gLED1_irq = 0;
 int gLED2_irq = 0;
@@ -39,7 +42,7 @@ int gLED2_irq = 0;
 int main(void)
 {
 	
-	int num1 = 0, num2= 0;
+	int num1 = 0, num2= 0, num3 = 0;
 	SystemInit();					//系统时钟配置
 	Init_NVIC();					//中断向量表注册函数
 	Init_LED();						//各个外设引脚配置
@@ -51,6 +54,13 @@ int main(void)
 	printf("请输入键盘上的任意字符，串口将以十进制输出你输入的字符\n\r");		   
 	while(1)													
 	{ 
+	/*
+		if(BAIJING_FLAG == 0){
+			continue;
+		}
+					printf("BAIJING_FLAG == %d\r\n",BAIJING_FLAG);
+*/		
+
 			if(gLED1_irq == 1)
 			{
 				gLED1_irq = 0;
@@ -65,7 +75,8 @@ int main(void)
 			if(gLED1 != 0xff ){
 				if(num1 > 20){
 					//printf("[1]led1 = 0x%x \r\n",gLED1);
-					printf("\r\n[1]LED1 = %d \r\n",getshumaguannNum(gLED1));
+					//printf("\r\n[1]LED1 = %d \r\n",getshumaguannNum(gLED1));
+					gReal_Num1 = getshumaguannNum(gLED1);
 					num1 = 0;
 				}
 				num1 ++;
@@ -76,15 +87,20 @@ int main(void)
 				
 				if(num2 > 20){
 					//printf("[2]led2 = 0x%x \r\n" , gLED2);
-					printf("\r\n[2]led2 = %d \r\n", getshumaguannNum(gLED2));
+				//	printf("\r\n[2]led2 = %d \r\n", getshumaguannNum(gLED2));
+					gReal_Num2 = getshumaguannNum(gLED2);
 					num2 = 0;
 				}
 				num2 ++;
 				//gLED1 = 0xff;
 				gLED2 = 0xff;
 			}
+			if(num3 > (10260*20)){
+				printf("num = %d\r\n",gReal_Num1 + gReal_Num2 *10);
+				num3 = 0;
+			}
+			num3 ++;
 			
-		
 //		LED1=~LED1;	   				
 //		Delay_Ms(200);				 //LED1闪烁，系统正在运行
 	}
@@ -203,6 +219,11 @@ void Init_LED(void)
   	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
   	GPIO_Init(GPIOD, &GPIO_InitStructure);
 		
+		GPIO_InitStructure.GPIO_Pin = GPIO_Pin_13;			 //D6
+  	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+  	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
+  	GPIO_Init(GPIOC, &GPIO_InitStructure);
+		
 }
 
 /*:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -264,10 +285,10 @@ void Init_NVIC(void)
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;				//使能中断
 	NVIC_Init(&NVIC_InitStructure);							   	//根据参数初始化中断寄存器
 	
-	NVIC_InitStructure.NVIC_IRQChannel = EXTI0_IRQn;			//??????PE0
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;	//???????1
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;			//?????0
-	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;				//????
+	NVIC_InitStructure.NVIC_IRQChannel = EXTI0_IRQn;			////设定中断源为E0
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 2;	//中断占优先级为1
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;			//副优先级为0
+	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;				//使能中断
 	NVIC_Init(&NVIC_InitStructure);	
 	
 	
@@ -277,7 +298,7 @@ int getnum(void){
 	int data = 0;
 //	char d4 = 0;
 	
-//	Delay_Ms(1);
+	Delay_Us(10);
 	if(PDIN0 == 1){
 		data += 0x01;
 //		d1 = PDIN0;
