@@ -6,8 +6,11 @@
 #include "hardware.h"
 
 
+#define HAVE_SIM800				0			// 包含SIM800
+#define Buf2_Max 200 					  //串口2缓存长度
+
 //LED引脚定义
-//#define LED1 PGout(14)	   	//板子上对应于LD1
+//#define LED_T PDout(2)	   	//板子上对应于D2
 
 //LED引脚定义
 #define LED1 PDout(13)	   	//板上LED编号 D5
@@ -25,6 +28,8 @@
 #define PDIN5 PDin(5)	   	//板上LED编号 D5
 #define PDIN6 PDin(6)	   	//板上LED编号 D6
 
-#define BAIJING_FLAG PCin(13)	   	//板上LED编号 C13
+//#define BAIJING_FLAG PCin(13)	   	//板上LED编号 C13
+#define BAIJING_FLAG PDin(8)	   	//板上LED编号 C13
+
 
 #endif
